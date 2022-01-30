@@ -43,7 +43,6 @@ userSchema.pre('save', async function (next) {
 
 userSchema.methods.getSignedJwtToken = function () {
   const secret = process.env.JWT_SECRET as string;
-  logger.info(`DEBUG: SECRET ${secret}`);
   return jwt.sign({ id: this._id }, secret, {
     expiresIn: process.env.JWT_EXPIRE,
   });

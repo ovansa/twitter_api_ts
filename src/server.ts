@@ -11,8 +11,6 @@ import users from './routes/user.routes';
 
 dotenv.config();
 
-connectDB();
-
 const app = express();
 const port = process.env.PORT || 4500;
 
@@ -27,6 +25,12 @@ app.use('/api/users', users);
 
 app.use(errorResponse);
 
-app.listen(port, async () => {
-  logger.info(`Server running on http://localhost:${port}`);
-});
+const connectToServer = async () => {
+  await connectDB();
+
+  app.listen(port, async () => {
+    logger.info(`Server running on http://localhost:${port}`);
+  });
+};
+
+connectToServer();

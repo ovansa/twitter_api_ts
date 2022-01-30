@@ -11,8 +11,6 @@ const errorResponse = (
   let error = { ...err };
   error.message = err.message;
 
-  logger.info(err);
-
   // Mongoose bad object id
   if (err.name === 'CastError') {
     const message = `Country not found with id ${err.value}`;
