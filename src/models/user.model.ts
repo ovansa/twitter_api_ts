@@ -1,6 +1,8 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import config from 'config';
+import jwt from 'jsonwebtoken';
+import logger from '../utils/logger';
 
 export interface IUser extends mongoose.Document {
   email: string;
@@ -17,7 +19,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true },
     username: { type: String, required: true, unique: true },
     name: { type: String, required: true },
-    password: { type: String, required: true, select: false },
+    password: { type: String, required: true },
   },
   {
     timestamps: true,
@@ -38,6 +40,14 @@ userSchema.pre('save', async function (next) {
 
   return next();
 });
+
+userSchema.methods.getSignedJwtToken = function () {
+  const secret = process.env.JWT_SECRET as string;
+  logger.info(`DEBUG: SECRET ${secret}`);
+  return jwt.sign({ id: this._id }, secret, {
+    expiresIn: process.env.JWT_EXPIRE,
+  });
+};
 
 userSchema.methods.matchPasswords = async function (
   candidatePassword: string
