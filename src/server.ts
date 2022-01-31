@@ -8,6 +8,7 @@ import errorResponse from './middleware/error';
 
 import healthCheck from './routes/healthcheck.routes';
 import users from './routes/user.routes';
+import tweets from './routes/tweet.routes';
 
 dotenv.config();
 
@@ -22,15 +23,17 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use('/', healthCheck);
 app.use('/api/users', users);
+app.use('/api/tweets', tweets);
 
 app.use(errorResponse);
 
-const connectToServer = async () => {
-  await connectDB();
+connectDB();
 
-  app.listen(port, async () => {
-    logger.info(`Server running on http://localhost:${port}`);
-  });
-};
+const server = app.listen(port, async () => {
+  logger.info(`Server running on http://localhost:${port}`);
+});
 
-connectToServer();
+process.on('unhandledRejection', (err: Error, promise) => {
+  logger.error(`Error: ${err.message}`);
+  server.close(() => process.exit(1));
+});
