@@ -13,7 +13,7 @@ const errorResponse = (
 
   // Mongoose bad object id
   if (err.name === 'CastError') {
-    const message = `Country not found with id ${err.value}`;
+    const message = `Tweet not found with id ${err.value}`;
     error = new ErrorResponse(message, 404);
   }
 

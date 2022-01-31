@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   addTweet,
+  deleteTweet,
   getAllTweets,
   getAllTweetsCreatedBySelf,
 } from '../controllers/tweet.controller';
@@ -10,8 +11,9 @@ import { addTweetSchema } from '../schema/tweet.schema';
 
 const router = express.Router();
 
-router.post('/add', requireUser, validateResource(addTweetSchema), addTweet);
+router.post('/', requireUser, validateResource(addTweetSchema), addTweet);
 router.get('/', requireUser, getAllTweets);
 router.get('/self', requireUser, getAllTweetsCreatedBySelf);
+router.delete('/:id', requireUser, deleteTweet);
 
 export default router;
