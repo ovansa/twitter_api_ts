@@ -32,9 +32,23 @@ export const loginUserSchema = object({
   }),
 });
 
+export const updatePasswordSchema = object({
+  body: object({
+    currentPassword: string({
+      required_error: 'Current password is required',
+    }),
+    newPassword: string({
+      required_error: 'New password is required',
+    }).min(6, 'Password too short - should be 6 chars minimum'),
+  }).refine((data) => data.currentPassword !== data.newPassword, {
+    message: 'New password should be different from your old password',
+    path: ['newPassword'],
+  }),
+});
+
 export type CreateUserInput = Omit<
   TypeOf<typeof createUserSchema>,
   'body.confirmPassword'
 >;
-
 export type LoginUserInput = TypeOf<typeof loginUserSchema>;
+export type UpdatePasswordInput = TypeOf<typeof updatePasswordSchema>;

@@ -1,13 +1,18 @@
 import { NextFunction, Request, Response } from 'express';
 import logger from '../utils/logger';
-import { CreateUserInput, LoginUserInput } from '../schema/user.schema';
+import {
+  CreateUserInput,
+  LoginUserInput,
+  UpdatePasswordInput,
+} from '../schema/user.schema';
 import User, { IUser } from '../models/user.model';
 import { DocumentDefinition } from 'mongoose';
 import { omit } from 'lodash';
 import ErrorResponse from '../utils/errorResponse';
+import { IAuthInfoRequest } from '../utils/definitions';
 
 // @desc    Register user
-// @route   POST /api/users/register
+// @route   POST /api/users
 // @access  Public
 export const registerUser = async (
   req: Request<{}, {}, CreateUserInput['body']>,
@@ -45,6 +50,31 @@ export const loginUser = async (
     }
 
     sendTokenResponse(user, 200, res);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Update password
+// @route   POST /api/users/updatepassword
+// @access  Private
+export const updatePassword = async (
+  req: Request<{}, {}, UpdatePasswordInput['body']>,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const request = req as IAuthInfoRequest;
+    const user = await User.findById(request.user._id);
+
+    if (!(await user?.matchPasswords(req.body.currentPassword))) {
+      return next(new ErrorResponse('Current password is incorrect', 401));
+    }
+
+    user!.password = req.body.newPassword;
+    await user!.save();
+
+    sendTokenResponse(user!, 200, res);
   } catch (err) {
     next(err);
   }

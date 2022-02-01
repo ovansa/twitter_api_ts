@@ -62,7 +62,7 @@ export const getAllTweetsCreatedBySelf = async (
 };
 
 // @desc    Delete a tweet
-// @route   GET /api/tweets
+// @route   DELETE /api/tweets
 // @access  Private
 export const deleteTweet = async (
   req: IAuthInfoRequest,
