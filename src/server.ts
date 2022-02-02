@@ -9,6 +9,7 @@ import errorResponse from './middleware/error';
 import healthCheck from './routes/healthcheck.routes';
 import users from './routes/user.routes';
 import tweets from './routes/tweet.routes';
+import uploads from './routes/upload.routes';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ if (process.env.NODE_ENV === 'development') {
 app.use('/', healthCheck);
 app.use('/api/users', users);
 app.use('/api/tweets', tweets);
+app.use('/api/uploads', uploads);
 
 app.use(errorResponse);
 
