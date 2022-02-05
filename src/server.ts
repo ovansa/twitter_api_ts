@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import fileupload from 'express-fileupload';
 import config from 'config';
 import connectDB from '../config/db';
 import logger from './utils/logger';
@@ -17,6 +18,7 @@ const app = express();
 const port = process.env.PORT || 4500;
 
 app.use(express.json());
+app.use(fileupload());
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
