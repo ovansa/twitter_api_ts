@@ -4,42 +4,60 @@ import multerS3 from 'multer-s3';
 import { NextFunction, Request, Response } from 'express';
 import logger from '../utils/logger';
 import { v4 as uuid } from 'uuid';
+import fs from 'fs';
 
-aws.config.update({
+// aws.config.update({
+//   secretAccessKey: process.env.AWS_SECRET,
+//   accessKeyId: process.env.AWS_ID,
+// });
+
+// const s3 = new aws.S3({
+//   secretAccessKey: process.env.AWS_SECRET,
+//   accessKeyId: process.env.AWS_ID,
+// });
+
+// const imageFilter = (req: any, file: any, cb: any) => {
+//   if (!file.originalname.match(/\.(JPG|jpg|jpeg|png|gif)$/)) {
+//     return cb(new Error('Only image files are allowed!'), false);
+//   }
+//   cb(null, true);
+// };
+
+// export const upload = multer({
+//   fileFilter: imageFilter,
+//   storage: multerS3({
+//     acl: 'public-read',
+//     s3,
+//     bucket: `${process.env.AWS_BUCKET_NAME}`,
+//     cacheControl: 'max-age=31536000',
+//     metadata: (req, file, cb) => {
+//       cb(null, { fieldName: file.fieldname });
+//     },
+//     key: (req, file, cb) => {
+//       cb(null, `${Date.now().toString()}.jpg`);
+//     },
+//   }),
+// }).single('file');
+
+// const storage = multer();
+// const uploadSimple = multer().single('image');
+var s3 = new aws.S3({
   secretAccessKey: process.env.AWS_SECRET,
   accessKeyId: process.env.AWS_ID,
 });
 
-const s3 = new aws.S3({
-  secretAccessKey: process.env.AWS_SECRET,
-  accessKeyId: process.env.AWS_ID,
-});
-
-const imageFilter = (req: any, file: any, cb: any) => {
-  if (!file.originalname.match(/\.(JPG|jpg|jpeg|png|gif)$/)) {
-    return cb(new Error('Only image files are allowed!'), false);
-  }
-  cb(null, true);
-};
-
-export const upload = multer({
-  fileFilter: imageFilter,
+var upload = multer({
   storage: multerS3({
-    acl: 'public-read',
-    s3,
+    s3: s3,
     bucket: `${process.env.AWS_BUCKET_NAME}`,
-    cacheControl: 'max-age=31536000',
-    metadata: (req, file, cb) => {
+    metadata: function (req, file, cb) {
       cb(null, { fieldName: file.fieldname });
     },
-    key: (req, file, cb) => {
-      cb(null, `${Date.now().toString()}.jpg`);
+    key: function (req, file, cb) {
+      cb(null, Date.now().toString());
     },
   }),
-}).single('file');
-
-const storage = multer();
-const uploadSimple = multer().single('image');
+});
 
 export const uploadFile = (req: Request, res: Response, next: NextFunction) => {
   // upload(req, res, async (err) => {
@@ -65,19 +83,18 @@ export const uploadFile = (req: Request, res: Response, next: NextFunction) => {
   // const props = Object.keys(myFile)
   let myFile = firstFile.name.split('.');
   const fileType = myFile[myFile.length - 1];
-  console.log(fileType);
+  console.log(firstFile);
 
-  const params = {
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `${uuid()}.${fileType}`,
-    Body: firstFile.buffer,
-  };
+  // const fileContent = fs.createReadStream(firstFile);
 
-  s3.upload(params, (error: any, data) => {
-    if (error) {
-      res.status(500).send(error.message);
-    }
+  // const params = {
+  //   Bucket: process.env.AWS_BUCKET_NAME,
+  //   Key: `${uuid()}.${fileType}`,
+  //   Body: fileContent,
+  // };
 
-    res.status(200).send(data);
+  res.send({
+    data: req.files,
+    msg: 'Successfully uploaded ' + req.files + ' files!',
   });
 };
