@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from 'express';
 import logger from '../utils/logger';
 import { v4 as uuid } from 'uuid';
 import fs from 'fs';
+import AWS from 'aws-sdk';
 
 // aws.config.update({
 //   secretAccessKey: process.env.AWS_SECRET,
@@ -41,24 +42,23 @@ import fs from 'fs';
 
 // const storage = multer();
 // const uploadSimple = multer().single('image');
-var s3 = new aws.S3({
-  secretAccessKey: process.env.AWS_SECRET,
-  accessKeyId: process.env.AWS_ID,
+// const s3Client = new S3Client({ region: process.env.AWS_S3_REGION });
+// export function uploadFiles(file, fileKey) {
+//   s3Client.send(
+//     new PutObjectCommand({
+//       Bucket: process.env.MY_AWS_S3_BUCKET,
+//       Key: fileKey,
+//       Body: file,
+//     })
+//   );
+// }
+
+const s3 = new AWS.S3({
+  secretAccessKey: 'pAw1H6O3FA+Q1IfVBXVRwEceaS4r+KflVwKKcz+/',
+  accessKeyId: 'AKIAT6YDIHBS33ZIOSXP',
 });
 
-var upload = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: `${process.env.AWS_BUCKET_NAME}`,
-    metadata: function (req, file, cb) {
-      cb(null, { fieldName: file.fieldname });
-    },
-    key: function (req, file, cb) {
-      cb(null, Date.now().toString());
-    },
-  }),
-});
-
+console.log(`Bucket name: ${process.env.AWS_BUCKET_NAME}`);
 export const uploadFile = (req: Request, res: Response, next: NextFunction) => {
   // upload(req, res, async (err) => {
   //   try {
@@ -83,18 +83,22 @@ export const uploadFile = (req: Request, res: Response, next: NextFunction) => {
   // const props = Object.keys(myFile)
   let myFile = firstFile.name.split('.');
   const fileType = myFile[myFile.length - 1];
-  console.log(firstFile);
+  console.log(firstFile.data.buffer);
 
-  // const fileContent = fs.createReadStream(firstFile);
+  const fileContent = fs.readFileSync(firstFile.tempFilePath);
+  console.log(fileContent);
 
-  // const params = {
-  //   Bucket: process.env.AWS_BUCKET_NAME,
-  //   Key: `${uuid()}.${fileType}`,
-  //   Body: fileContent,
-  // };
+  const params = {
+    Bucket: 'twitter-api-ts',
+    Key: `${uuid()}.${fileType}`,
+    Body: fileContent,
+  };
 
-  res.send({
-    data: req.files,
-    msg: 'Successfully uploaded ' + req.files + ' files!',
+  s3.upload(params, (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    console.log(data.Location);
+    return res.status(200).json({ message: 'File uploaded' });
   });
 };

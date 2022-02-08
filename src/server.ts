@@ -18,7 +18,7 @@ const app = express();
 const port = process.env.PORT || 4500;
 
 app.use(express.json());
-app.use(fileupload());
+app.use(fileupload({ useTempFiles: true, tempFileDir: '/tmp/' }));
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
