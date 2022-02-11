@@ -4,6 +4,7 @@ import {
   CreateUserInput,
   LoginUserInput,
   UpdatePasswordInput,
+  UpdateUserDetailsInput,
 } from '../schema/user.schema';
 import User, { IUser } from '../models/user.model';
 import { DocumentDefinition } from 'mongoose';
@@ -75,6 +76,32 @@ export const updatePassword = async (
     await user!.save();
 
     sendTokenResponse(user!, 200, res);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Update password
+// @route   POST /api/users/updatepassword
+// @access  Private
+export const updateUserDetails = async (
+  req: Request<{}, {}, UpdateUserDetailsInput['body']>,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log(JSON.stringify(req.body));
+  try {
+    const request = req as IAuthInfoRequest;
+    const user = await User.findById(request.user._id);
+    const update = await User.findByIdAndUpdate(user?._id, {
+      name: req.body.name,
+      profile_picture: req.body.profile_picture,
+    });
+    console.log(JSON.stringify(update));
+
+    res
+      .status(200)
+      .json({ name: req.body.name, profile_picture: req.body.profile_picture });
   } catch (err) {
     next(err);
   }

@@ -32,6 +32,15 @@ export const loginUserSchema = object({
   }),
 });
 
+export const updateUserSchema = object({
+  body: object({
+    name: string().nonempty({ message: 'Name cannot be empty' }),
+    profile_picture: string().nonempty({
+      message: 'Profile picture cannot be empty',
+    }),
+  }),
+});
+
 export const updatePasswordSchema = object({
   body: object({
     currentPassword: string({
@@ -52,3 +61,4 @@ export type CreateUserInput = Omit<
 >;
 export type LoginUserInput = TypeOf<typeof loginUserSchema>;
 export type UpdatePasswordInput = TypeOf<typeof updatePasswordSchema>;
+export type UpdateUserDetailsInput = TypeOf<typeof updateUserSchema>;
