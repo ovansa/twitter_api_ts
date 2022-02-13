@@ -104,9 +104,9 @@ export const updateUserDetails = async (
 };
 
 // @desc    Get Profile
-// @route   GET /api/profile
+// @route   GET /api/users/profile
 // @access  Private
-export const getProfile = async (
+export const getCurrentUserProfile = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -114,6 +114,28 @@ export const getProfile = async (
   try {
     const request = req as IAuthInfoRequest;
     const user = await User.findById(request.user._id);
+
+    res.status(200).json({ user: sanitizedUser(user!) });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get User Details
+// @route   GET /api/users/:id
+// @access  Private
+export const getUserDetails = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const request = req as IAuthInfoRequest;
+    const user = await User.findById(request.params.id);
+
+    if (!user) {
+      return next(new ErrorResponse('User not found', 404));
+    }
 
     res.status(200).json({ user: sanitizedUser(user!) });
   } catch (err) {
