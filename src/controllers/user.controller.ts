@@ -89,19 +89,33 @@ export const updateUserDetails = async (
   res: Response,
   next: NextFunction
 ) => {
-  console.log(JSON.stringify(req.body));
   try {
     const request = req as IAuthInfoRequest;
     const user = await User.findById(request.user._id);
-    const update = await User.findByIdAndUpdate(user?._id, {
+    const updateUser = await User.findByIdAndUpdate(user?._id, {
       name: req.body.name,
       profile_picture: req.body.profile_picture,
     });
-    console.log(JSON.stringify(update));
 
-    res
-      .status(200)
-      .json({ name: req.body.name, profile_picture: req.body.profile_picture });
+    res.status(200).json({ user: sanitizedUser(updateUser!) });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Get Profile
+// @route   GET /api/profile
+// @access  Private
+export const getProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const request = req as IAuthInfoRequest;
+    const user = await User.findById(request.user._id);
+
+    res.status(200).json({ user: sanitizedUser(user!) });
   } catch (err) {
     next(err);
   }
@@ -138,4 +152,8 @@ export const sendTokenResponse = (
     .status(statusCode)
     .cookie('token', token, options)
     .json({ success: true, token, user: sanitizedUser });
+};
+
+export const sanitizedUser = (user: InstanceType<typeof User>) => {
+  return omit(user.toJSON(), 'password');
 };
