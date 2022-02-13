@@ -179,3 +179,8 @@ export const sendTokenResponse = (
 export const sanitizedUser = (user: InstanceType<typeof User>) => {
   return omit(user.toJSON(), 'password');
 };
+
+// Update user details
+// Update error message
+// Try out forgot password flow
+// Integrate email for forgot password
